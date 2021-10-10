@@ -15,7 +15,7 @@ def load_data(
     if os.path.exists(data_filename):
         player_data = pd.read_csv(data_filename)
     else:
-        player_data = pd.DataFrame(columns=["civilisation"])
+        player_data = pd.DataFrame()
     with open(list_filename) as f:
         list_info = json.load(f)
         return list_info, player_data
@@ -39,8 +39,11 @@ def assign_civ(ref_list: dict, game_players: dict, player_data):
         ref_list (dict): [description]
     """
     all_civs = ref_list["civilisations"]
-    banned_civs = []
-    # banned_civs = player_data[player_data["game_date"] == str(datetime.date.today())].civilisation.unique()
+    # banned_civs = []
+    if not "civilisation" in player_data:
+        banned_civs = []
+    else:
+        banned_civs = player_data[player_data["game_date"] == str(datetime.date.today())].civilisation.unique()
     available_civs = [civ for civ in all_civs if civ not in banned_civs]
     for player in game_players:
         civ_allocation = random.choice(available_civs)
@@ -52,15 +55,12 @@ def assign_civ(ref_list: dict, game_players: dict, player_data):
 
 def save_data(player_assignment, filename, player_data):
     player_df = pd.DataFrame.from_dict(player_assignment, orient="index")
-    # player_df.index.name = "player_name"
-    player_df.reset_index()
-    print(player_df)
+    player_df.index.name = "player_name"
+    player_df.reset_index(level=0, inplace=True)
     player_df["game_date"] = datetime.date.today()
     player_df["start_time"] = datetime.datetime.now().strftime("%H:%M")
-    # print(player_df.head())
-    # player_data.append(player_df)
-    player_data = pd.concat([player_data, player_df])
-    player_data.to_csv(filename)
+    player_data = pd.concat([player_data, player_df], ignore_index=True, axis=0)
+    player_data.to_csv(filename, index=False)
 
 
 if __name__ == "__main__":
