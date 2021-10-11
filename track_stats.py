@@ -39,7 +39,6 @@ def assign_civ(ref_list: dict, game_players: dict, player_data):
         ref_list (dict): [description]
     """
     all_civs = ref_list["civilisations"]
-    # banned_civs = []
     if not "civilisation" in player_data:
         banned_civs = []
     else:
